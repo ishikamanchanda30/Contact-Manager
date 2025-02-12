@@ -12,12 +12,11 @@ const registerUser = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("All feilds are mandatory!");
   }
-  const userAvailable = await User.findOne({ email });
+  const userAvailable = await User.findOne({ email,username });
   if (userAvailable) {
     res.status(400);
-    throw new Error("Email already in use");
+    throw new Error("Email or Username already in use");
   }
-
   // Hash the password :
   const hashedPassword = await bcrypt.hash(password, 10);
   const user = await User.create({
@@ -57,7 +56,7 @@ const loginUser = asyncHandler(async (req, res) => {
         },
       },
       process.env.ACCESS_TOKEN_SECRET,
-      {expiresIn:"1m"}
+      {expiresIn:"15m"}
     );
     // we need to provide an access token:
     res.status(200).json({ accesstoken });
@@ -72,7 +71,7 @@ const loginUser = asyncHandler(async (req, res) => {
 // @route POST /api/user/current
 // @access Private
 const currentUser = asyncHandler(async (req, res) => {
-  res.json({ message: "Current User Info" });
+  res.json(req.user);
 });
 
 module.exports = { registerUser, loginUser, currentUser };
